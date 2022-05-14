@@ -45,8 +45,8 @@ namespace RimSpreadsheet
                     WriteEquipedStatOffsets(sw, apparel);
                     sw.Write("\n");
                 }
-                sw.WriteLine(GetAllBodyGroups());
-                sw.WriteLine(GetAllLayers());
+                //sw.WriteLine(GetAllBodyGroups());
+                //sw.WriteLine(GetAllLayers());
             }
         }
 
@@ -59,6 +59,7 @@ namespace RimSpreadsheet
             layers.ForEach(s => sw.Write(s + comma));
             sw.Write("Stuff" + comma);
             sw.Write("EquippedStatOffsets" + comma);
+            sw.Write("\n");
         }
 
         private static void WriteApparelStats(StreamWriter sw, ThingDef apparel, List<String> statNames, Func<ThingDef, string, string> statGetter)
