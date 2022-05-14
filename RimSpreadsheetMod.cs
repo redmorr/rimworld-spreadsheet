@@ -13,8 +13,8 @@ namespace RimSpreadsheet
     {
         private static readonly List<String> armor = new List<String> { "StuffEffectMultiplierArmor", "ArmorRating_Sharp", "ArmorRating_Blunt", "ArmorRating_Heat" };
         private static readonly List<String> insulation = new List<String> { "StuffEffectMultiplierInsulation_Cold", "StuffEffectMultiplierInsulation_Heat", "Insulation_Cold", "Insulation_Heat" };
-        private static readonly List<String> bodyGroups = new List<String> { "FullHead", "UpperHead", "Neck", "Shoulders", "Arms", "Torso", "Waist", "Legs" };
         private static readonly List<String> layers = new List<String> { "OnSkin", "Middle", "Shell", "Belt", "Overhead", "EyeCover" };
+        private static readonly List<String> bodyGroups = new List<String> { "FullHead", "UpperHead", "Neck", "Shoulders", "Arms", "Torso", "Waist", "Legs" };
 
         private const string trueValue = "X";
         private const string noValue = " ";
@@ -37,10 +37,10 @@ namespace RimSpreadsheet
                 foreach (ThingDef apparel in GetApparels())
                 {
                     sw.Write(apparel.label + comma);
-                    WriteArmors(sw, apparel, armor);
-                    WriteInsulation(sw, apparel, insulation);
-                    WriteLayers(sw, apparel, layers);
-                    WriteBodyGroups(sw, apparel, bodyGroups);
+                    WriteApparelStats(sw, apparel, armor, GetApparelStat);
+                    WriteApparelStats(sw, apparel, insulation, GetApparelStat);
+                    WriteApparelStats(sw, apparel, layers, HasApparelLayerDef);
+                    WriteApparelStats(sw, apparel, bodyGroups, HasBodyPartGroupDef);
                     WriteStuff(sw, apparel);
                     WriteEquipedStatOffsets(sw, apparel);
                     sw.Write("\n");
@@ -61,24 +61,9 @@ namespace RimSpreadsheet
             sw.Write("EquippedStatOffsets" + comma);
         }
 
-        private static void WriteArmors(StreamWriter sw, ThingDef apparel, List<String> statNames)
+        private static void WriteApparelStats(StreamWriter sw, ThingDef apparel, List<String> statNames, Func<ThingDef, string, string> statGetter)
         {
-            statNames.ForEach(s => sw.Write(GetApparelStat(apparel, s) + comma));
-        }
-
-        private static void WriteInsulation(StreamWriter sw, ThingDef apparel, List<String> statNames)
-        {
-            statNames.ForEach(s => sw.Write(GetApparelStat(apparel, s) + comma));
-        }
-
-        public static void WriteLayers(StreamWriter sw, ThingDef apparel, List<String> statNames)
-        {
-            statNames.ForEach(s => sw.Write(HasApparelLayerDef(apparel, s) + comma));
-        }
-
-        private static void WriteBodyGroups(StreamWriter sw, ThingDef apparel, List<String> statNames)
-        {
-            statNames.ForEach(s => sw.Write(HasBodyPartGroupDef(apparel, s) + comma));
+            statNames.ForEach(s => sw.Write(statGetter(apparel, s) + comma));
         }
 
         public static void WriteStuff(StreamWriter sw, ThingDef apparel)
