@@ -16,6 +16,8 @@ namespace RimSpreadsheet
         private static readonly List<String> layers = new List<String> { "OnSkin", "Middle", "Shell", "Belt", "Overhead", "EyeCover" };
         private static readonly List<String> bodyGroups = new List<String> { "FullHead", "UpperHead", "Neck", "Shoulders", "Arms", "Torso", "Waist", "Legs" };
 
+        private static readonly List<String> rangedAccuracy = new List<String> { "AccuracyTouch", "AccuracyShort", "AccuracyMedium", "AccuracyLong", "RangedWeapon_Cooldown" };
+
         private const string trueValue = "X";
         private const string noValue = " ";
         private const string comma = ",";
@@ -25,9 +27,11 @@ namespace RimSpreadsheet
         static RimSpreadsheetMod()
         {
             Log.Message("RimSpreadsheetMod init");
-            WriteToApparelsCsv(Environment.GetEnvironmentVariable("USERPROFILE") + @"\Desktop\layers3.csv");
+            WriteToApparelsCsv(Environment.GetEnvironmentVariable("USERPROFILE") + @"\Desktop\apparels.csv");
+            WriteToWeaponsCsv(Environment.GetEnvironmentVariable("USERPROFILE") + @"\Desktop\weapons.csv");
             Log.Message("RimSpreadsheetMod fin");
         }
+
 
         public static void WriteToApparelsCsv(string path)
         {
@@ -47,6 +51,21 @@ namespace RimSpreadsheet
                 }
                 //sw.WriteLine(GetAllBodyGroups());
                 //sw.WriteLine(GetAllLayers());
+            }
+        }
+
+        private static void WriteToWeaponsCsv(string path)
+        {
+            using (StreamWriter sw = new StreamWriter(path))
+            {
+                WriteHeaders(sw);
+                foreach (ThingDef rangedWeapon in GetRangedWeapons())
+                {
+                    sw.Write(rangedWeapon.label + comma);
+                    WriteApparelStats(sw, rangedWeapon, rangedAccuracy, GetApparelStat);
+                    WriteVerbs(sw, rangedWeapon);
+                    sw.Write("\n");
+                }
             }
         }
 
@@ -72,6 +91,17 @@ namespace RimSpreadsheet
             sw.Write(GetApparelStuffCategories(apparel) + comma);
         }
 
+        public static void WriteVerbs(StreamWriter sw, ThingDef weapon)
+        {
+            if (weapon.Verbs != null)
+            {
+                sw.Write(String.Join(multipleValuesSeparator, from VerbProperties verb in weapon.Verbs select verb.label) + comma);
+                sw.Write(String.Join(multipleValuesSeparator, from VerbProperties verb in weapon.Verbs select verb.range) + comma);
+                sw.Write(String.Join(multipleValuesSeparator, from VerbProperties verb in weapon.Verbs select verb.warmupTime) + comma);
+            }
+            sw.Write(noValue + comma);
+        }
+
         private static void WriteEquipedStatOffsets(StreamWriter sw, ThingDef apparel)
         {
             sw.Write(GetEquipedStatOffsets(apparel));
@@ -82,6 +112,13 @@ namespace RimSpreadsheet
             return from s in DefDatabase<ThingDef>.AllDefs
                    where s.IsApparel == true
                    select s;
+        }
+
+        public static IEnumerable<ThingDef> GetRangedWeapons()
+        {
+            return from thing in DefDatabase<ThingDef>.AllDefs
+                   where thing.IsRangedWeapon == true
+                   select thing;
         }
 
         public static String GetApparelStat(ThingDef a, string statName)
