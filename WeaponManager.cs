@@ -22,6 +22,7 @@ namespace RimSpreadsheet
                     sw.Write(rangedWeapon.label + Common.comma);
                     Common.WriteStatBases(sw, rangedWeapon, rangedAccuracy, Common.GetStatBase);
                     WriteVerbs(sw, rangedWeapon);
+                    WriteDefaultProjectile(sw, rangedWeapon);
                     sw.Write("\n");
                 }
             }
@@ -31,6 +32,7 @@ namespace RimSpreadsheet
         {
             sw.Write("Name" + Common.comma);
             rangedAccuracy.ForEach(s => sw.Write(s + Common.comma));
+            sw.Write("\n");
         }
 
         public static void WriteVerbs(StreamWriter sw, ThingDef weapon)
@@ -40,8 +42,25 @@ namespace RimSpreadsheet
                 sw.Write(String.Join(Common.multipleValuesSeparator, from VerbProperties verb in weapon.Verbs select verb.label) + Common.comma);
                 sw.Write(String.Join(Common.multipleValuesSeparator, from VerbProperties verb in weapon.Verbs select verb.range) + Common.comma);
                 sw.Write(String.Join(Common.multipleValuesSeparator, from VerbProperties verb in weapon.Verbs select verb.warmupTime) + Common.comma);
+                
+            } 
+            else
+            {
+                sw.Write(Common.noValue + Common.comma);
             }
-            sw.Write(Common.noValue + Common.comma);
+        }
+
+        public static void WriteDefaultProjectile(StreamWriter sw, ThingDef weapon)
+        {
+            ThingDef defaultProjectile = (from VerbProperties verb in weapon.Verbs select verb.defaultProjectile).FirstOrDefault();
+            if (defaultProjectile != null)
+            {
+                sw.Write(defaultProjectile.label);
+            }
+            else
+            {
+                sw.Write(Common.noValue + Common.comma);
+            }
         }
 
         public static IEnumerable<ThingDef> GetRangedWeapons()
