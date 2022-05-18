@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
+using RimWorld;
 
 namespace RimSpreadsheet
 {
@@ -24,6 +25,9 @@ namespace RimSpreadsheet
                     WriteVerbs(sw, rangedWeapon);
                     WriteDefaultProjectile(sw, rangedWeapon);
                     sw.Write("\n");
+                    //StatDefOf.ArmorRating_Blunt;
+                    //StatDef.Named("Bulk")
+                    //armorBlunt = th.GetStatValue(StatDefOf.ArmorRating_Blunt)
                 }
             }
         }
@@ -55,12 +59,23 @@ namespace RimSpreadsheet
             ThingDef defaultProjectile = (from VerbProperties verb in weapon.Verbs select verb.defaultProjectile).FirstOrDefault();
             if (defaultProjectile != null)
             {
-                sw.Write(defaultProjectile.label);
+                sw.Write(defaultProjectile.label + Common.comma);
+                if (defaultProjectile.projectile != null)
+                {
+                    sw.Write(defaultProjectile.projectile.GetDamageAmount(weapon, null) + Common.comma);
+                }
             }
             else
             {
                 sw.Write(Common.noValue + Common.comma);
             }
+        }
+
+        public static ThingDef GetRangedWeapon(string weaponName) {
+            return (from thingDef in DefDatabase<ThingDef>.AllDefs
+                   where thingDef.defName == weaponName
+                   select thingDef).
+                   SingleOrDefault();
         }
 
         public static IEnumerable<ThingDef> GetRangedWeapons()
