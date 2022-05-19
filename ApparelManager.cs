@@ -10,10 +10,10 @@ namespace RimSpreadsheet
     internal class ApparelManager
     {
 
-        private static readonly List<String> armor = new List<String> { "StuffEffectMultiplierArmor", "ArmorRating_Sharp", "ArmorRating_Blunt", "ArmorRating_Heat" };
-        private static readonly List<String> insulation = new List<String> { "StuffEffectMultiplierInsulation_Cold", "StuffEffectMultiplierInsulation_Heat", "Insulation_Cold", "Insulation_Heat" };
-        private static readonly List<String> layers = new List<String> { "OnSkin", "Middle", "Shell", "Belt", "Overhead", "EyeCover" };
-        private static readonly List<String> bodyGroups = new List<String> { "FullHead", "UpperHead", "Neck", "Shoulders", "Arms", "Torso", "Waist", "Legs" };
+        private static readonly List<Def> armor = new List<Def> { StatDefOf.StuffEffectMultiplierArmor, StatDefOf.ArmorRating_Sharp, StatDefOf.ArmorRating_Blunt, StatDefOf.ArmorRating_Heat };
+        private static readonly List<Def> insulation = new List<Def> { StatDefOf.StuffEffectMultiplierInsulation_Cold, StatDefOf.StuffEffectMultiplierInsulation_Heat, StatDefOf.Insulation_Cold, StatDefOf.Insulation_Heat };
+        private static readonly List<Def> layers = new List<Def> { ApparelLayerDefOf.OnSkin, ApparelLayerDefOf.Middle, ApparelLayerDefOf.Shell, ApparelLayerDefOf.Belt, ApparelLayerDefOf.Overhead, ApparelLayerDefOf.EyeCover };
+        private static readonly List<Def> bodyGroups = new List<Def> { BodyPartGroupDefOf.FullHead, BodyPartGroupDefOf.UpperHead, BodyPartGroupDefOf.Eyes, BodyPartGroupDefOf.Torso, BodyPartGroupDefOf.LeftHand, BodyPartGroupDefOf.RightHand, BodyPartGroupDefOf.Legs };
 
 
         public static void WriteToApparelsCsv(string path)
@@ -23,11 +23,14 @@ namespace RimSpreadsheet
                 WriteHeaders(sw);
                 foreach (ThingDef apparel in GetApparels())
                 {
+                    var a = BodyDefOf.Human;
+                    var b = BodyPartDefOf.Arm;
+                    var c = BodyPartGroupDefOf.UpperHead;
                     sw.Write(apparel.label + Common.comma);
-                    Common.WriteStatBases(sw, apparel, armor, Common.GetStatBase);
-                    Common.WriteStatBases(sw, apparel, insulation, Common.GetStatBase);
-                    Common.WriteStatBases(sw, apparel, layers, HasApparelLayerDef);
-                    Common.WriteStatBases(sw, apparel, bodyGroups, HasBodyPartGroupDef);
+                    Common.WriteStats(sw, apparel, armor, Common.GetStatBase);
+                    Common.WriteStats(sw, apparel, insulation, Common.GetStatBase);
+                    Common.WriteStats(sw, apparel, layers, HasApparelLayerDef);
+                    Common.WriteStats(sw, apparel, bodyGroups, HasBodyPartGroupDef);
                     WriteStuff(sw, apparel);
                     WriteEquipedStatOffsets(sw, apparel);
                     sw.Write("\n");
@@ -82,20 +85,14 @@ namespace RimSpreadsheet
             return Common.noValue;
         }
 
-        public static string HasApparelLayerDef(ThingDef apparelDef, string layer)
+        public static string HasApparelLayerDef(ThingDef apparelDef, Def layer)
         {
-            IEnumerable<string> layers = from x in apparelDef.apparel.layers
-                                         select x.defName;
-
-            return layers.Contains(layer) ? Common.trueValue : Common.noValue;
+            return (from l in apparelDef.apparel.layers select l).Contains(layer) ? Common.trueValue : Common.noValue;
         }
 
-        public static string HasBodyPartGroupDef(ThingDef apparelDef, string bodyPartGroup)
+        public static string HasBodyPartGroupDef(ThingDef apparelDef, Def bodyPartGroup)
         {
-            IEnumerable<string> bodyPartGroups = from x in apparelDef.apparel.bodyPartGroups
-                                                 select x.defName;
-
-            return bodyPartGroups.Contains(bodyPartGroup) ? Common.trueValue : Common.noValue;
+            return (from bpg in apparelDef.apparel.bodyPartGroups select bpg).Contains(bodyPartGroup) ? Common.trueValue : Common.noValue;
         }
 
         private static void WriteEquipedStatOffsets(StreamWriter sw, ThingDef apparel)
